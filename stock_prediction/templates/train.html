@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Training Model{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in">
+    <h1>Latih Model LSTM</h1>
+    <p>Konfigurasi parameter training untuk model prediksi saham</p>
+</div>
+
+<!-- Step Indicator -->
+<div class="steps fade-in fade-in-d1">
+    <div class="step-item done">
+        <div class="step-number">✓</div>
+        <span class="step-label">Ambil Data</span>
+    </div>
+    <div class="step-connector done"></div>
+    <div class="step-item active">
+        <div class="step-number">2</div>
+        <span class="step-label">Training</span>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step-item">
+        <div class="step-number">3</div>
+        <span class="step-label">Prediksi</span>
+    </div>
+</div>
+
+<div class="card fade-in fade-in-d2" style="max-width:780px;margin:0 auto;">
+    <div class="card-header accent">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--v2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.18V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.26.6.85 1 1.51 1H21a2 2 0 0 1 0 4h-.09c-.66 0-1.25.4-1.51 1z"/></svg>
+        <h4>Parameter Model</h4>
+    </div>
+    <div class="card-body">
+        <form method="post" action="{{ url_for('train_model') }}">
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label class="form-label">Epochs</label>
+                    <input type="number" class="form-control" name="epochs" value="50" min="1" max="500" required>
+                    <span class="form-text">Jumlah iterasi pelatihan</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Batch Size</label>
+                    <input type="number" class="form-control" name="batch_size" value="32" min="1" max="256" required>
+                    <span class="form-text">Sampel per batch</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Neurons</label>
+                    <input type="number" class="form-control" name="neurons" value="50" min="10" max="200" required>
+                    <span class="form-text">Neuron per layer</span>
+                </div>
+            </div>
+
+            <div class="form-row-4">
+                <div class="form-group">
+                    <label class="form-label">Time Step</label>
+                    <input type="number" class="form-control" name="time_step" value="5" min="2" max="30" required>
+                    <span class="form-text">Jendela waktu</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Learning Rate</label>
+                    <input type="number" class="form-control" name="learning_rate" value="0.001" min="0.0001" max="0.1" step="0.0001" required>
+                    <span class="form-text">Kecepatan belajar</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Dropout Rate</label>
+                    <input type="number" class="form-control" name="dropout_rate" value="0.2" min="0" max="0.5" step="0.05" required>
+                    <span class="form-text">Tingkat dropout</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">LSTM Layers</label>
+                    <select class="form-select" name="lstm_layers" required>
+                        <option value="2" selected>2 (Default)</option>
+                        <option value="3">3 (Deeper)</option>
+                        <option value="1">1 (Simple)</option>
+                    </select>
+                    <span class="form-text">Jumlah layer LSTM</span>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    Preprocess Data & Mulai Training
+                </button>
+                <a href="{{ url_for('index') }}" class="btn btn-ghost" style="margin-left:8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    Kembali
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

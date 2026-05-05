@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Opsi Prediksi{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in">
+    <h1>Prediksi Saham</h1>
+    <p>Pilih metode prediksi untuk menganalisis harga saham</p>
+</div>
+
+<!-- Step Indicator -->
+<div class="steps fade-in fade-in-d1">
+    <div class="step-item done">
+        <div class="step-number">✓</div>
+        <span class="step-label">Ambil Data</span>
+    </div>
+    <div class="step-connector done"></div>
+    <div class="step-item done">
+        <div class="step-number">✓</div>
+        <span class="step-label">Training</span>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step-item active">
+        <div class="step-number">3</div>
+        <span class="step-label">Prediksi</span>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div style="text-align:center;margin-bottom:1.2rem;">
+            <div class="spinner" style="width:40px;height:40px;border-width:3px;margin:0 auto .75rem;"></div>
+            <h5>Memproses Prediksi Saham</h5>
+        </div>
+        <div class="progress mb-2">
+            <div class="progress-bar" id="progressBar" style="width:0%"></div>
+        </div>
+        <div style="text-align:right;font-size:.7rem;color:var(--t3);margin-bottom:.75rem;">
+            <span id="progressText">0%</span>
+        </div>
+        <div>
+            <div class="progress-step">
+                <span class="step-icon processing" id="step1">1</span>
+                <span id="step1Text">Memuat model prediksi...</span>
+            </div>
+            <div class="progress-step">
+                <span class="step-icon" id="step2">2</span>
+                <span id="step2Text">Memproses data saham...</span>
+            </div>
+            <div class="progress-step">
+                <span class="step-icon" id="step3">3</span>
+                <span id="step3Text">Menjalankan prediksi...</span>
+            </div>
+            <div class="progress-step">
+                <span class="step-icon" id="step4">4</span>
+                <span id="step4Text">Membuat grafik prediksi...</span>
+            </div>
+            <div class="progress-step">
+                <span class="step-icon" id="step5">5</span>
+                <span id="step5Text">Menyelesaikan laporan...</span>
+            </div>
+        </div>
+        <p style="text-align:center;font-size:.7rem;color:var(--t3);margin-top:.75rem;">
+            Proses ini membutuhkan waktu beberapa menit...
+        </p>
+    </div>
+</div>
+
+<!-- Options -->
+<div class="grid-2 fade-in fade-in-d2">
+    <div class="card">
+        <div class="card-header accent">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--v2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <h4>Gunakan Model Saat Ini</h4>
+        </div>
+        <div class="card-body">
+            <p style="color:var(--t2);font-size:.8rem;margin-bottom:1.2rem;">
+                Gunakan model yang baru saja dilatih untuk prediksi harga saham secara langsung.
+            </p>
+            <form method="POST" action="/predict" id="predictForm">
+                <input type="hidden" name="model_source" value="current">
+                <button type="submit" class="btn btn-primary btn-block" id="predictBtn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <span class="btn-text">Mulai Prediksi</span>
+                    <span class="spinner hidden" id="btnSpinner"></span>
+                </button>
+                <div class="form-check mt-2">
+                    <input type="checkbox" value="true" id="cleanup" name="cleanup">
+                    <label for="cleanup">Hapus model & data setelah prediksi</label>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <h4>Prediksi Upload Model</h4>
+        </div>
+        <div class="card-body">
+            <p style="color:var(--t2);font-size:.8rem;margin-bottom:1.2rem;">
+                Upload model yang sudah dilatih sebelumnya dan lakukan prediksi saham secara langsung.
+            </p>
+            <a href="/direct_predict" class="btn btn-info btn-block">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Ke Halaman Prediksi Langsung
+            </a>
+            <p class="form-text mt-2">Upload model terlatih (.zip) dan lakukan prediksi</p>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4 fade-in fade-in-d3">
+    <a href="{{ url_for('index') }}" class="btn btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Kembali ke Beranda
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+    var steps = [
+        { duration: 1000, text: "Memuat model prediksi..." },
+        { duration: 2000, text: "Memproses data saham..." },
+        { duration: 3000, text: "Menjalankan prediksi..." },
+        { duration: 8000, text: "Membuat grafik prediksi..." },
+        { duration: 1000, text: "Menyelesaikan laporan..." }
+    ];
+
+    function showLoading() {
+        document.getElementById('loadingOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
+        var currentStep = 0, totalProgress = 0;
+        var totalDuration = steps.reduce(function(s,st){return s+st.duration},0);
+
+        function updateStep() {
+            if (currentStep < steps.length) {
+                var el = document.getElementById('step'+(currentStep+1));
+                var tx = document.getElementById('step'+(currentStep+1)+'Text');
+                el.className = 'step-icon processing';
+                tx.innerHTML = steps[currentStep].text + ' <span class="spinner" style="margin-left:6px;"></span>';
+                var stepP = (steps.slice(0,currentStep+1).reduce(function(s,st){return s+st.duration},0)/totalDuration)*100;
+                var bar = document.getElementById('progressBar'), ptx = document.getElementById('progressText');
+                var cur = totalProgress, inc = (stepP-totalProgress)/(steps[currentStep].duration/50);
+                var iv = setInterval(function(){
+                    cur += inc;
+                    if(cur >= stepP){ cur = stepP; clearInterval(iv);
+                        el.className = 'step-icon completed'; el.innerHTML = '✓';
+                        tx.innerHTML = steps[currentStep].text.replace('...',' — Selesai');
+                        totalProgress = stepP; currentStep++;
+                        if(currentStep < steps.length) setTimeout(updateStep, 200);
+                        else setTimeout(function(){ ptx.textContent = '100% — Mengarahkan ke hasil...'; }, 500);
+                    }
+                    bar.style.width = cur+'%'; ptx.textContent = Math.round(cur)+'%';
+                }, 50);
+            }
+        }
+        updateStep();
+    }
+
+    function hideLoading() {
+        document.getElementById('loadingOverlay').classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    document.getElementById('predictForm').addEventListener('submit', function(e) {
+        var btn = document.getElementById('predictBtn');
+        btn.querySelector('.btn-text').textContent = 'Memproses...';
+        document.getElementById('btnSpinner').classList.remove('hidden');
+        btn.disabled = true; btn.style.opacity = '0.7';
+        showLoading();
+    });
+
+    window.addEventListener('load', function() {
+        var btn = document.getElementById('predictBtn');
+        btn.querySelector('.btn-text').textContent = 'Mulai Prediksi';
+        document.getElementById('btnSpinner').classList.add('hidden');
+        btn.disabled = false; btn.style.opacity = '1';
+        hideLoading();
+    });
+
+    window.addEventListener('beforeunload', hideLoading);
+</script>
+{% endblock %}

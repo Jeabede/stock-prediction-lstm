@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Hasil Preprocessing{% endblock %}
+
+{% block content %}
+<!-- Training Loading Overlay -->
+<div class="loading-overlay" id="trainingOverlay">
+    <div class="loading-content">
+        <div style="text-align:center;margin-bottom:1.2rem;">
+            <div class="spinner" style="width:40px;height:40px;border-width:3px;margin:0 auto .75rem;"></div>
+            <h5>Sedang Training Model LSTM</h5>
+        </div>
+        <div class="progress mb-2">
+            <div class="progress-bar" id="trainingProgress" style="width:0%;transition:width 2s ease;"></div>
+        </div>
+        <div>
+            <div class="progress-step">
+                <span class="step-icon processing" id="tstep1">1</span>
+                <span id="tstep1Text">Mempersiapkan arsitektur LSTM...</span>
+            </div>
+            <div class="progress-step">
+                <span class="step-icon" id="tstep2">2</span>
+                <span id="tstep2Text">Training model (epoch 1-N)...</span>
+            </div>
+            <div class="progress-step">
+                <span class="step-icon" id="tstep3">3</span>
+                <span id="tstep3Text">Validasi model...</span>
+            </div>
+            <div class="progress-step">
+                <span class="step-icon" id="tstep4">4</span>
+                <span id="tstep4Text">Menyimpan model & grafik...</span>
+            </div>
+        </div>
+        <p style="text-align:center;font-size:.7rem;color:var(--t3);margin-top:.75rem;">
+            Proses ini membutuhkan waktu beberapa menit. Mohon jangan tutup halaman ini.
+        </p>
+    </div>
+</div>
+
+<div class="page-header fade-in">
+    <h1>Hasil Preprocessing Data</h1>
+    <p>Data telah dinormalisasi dan dipisahkan untuk training dan testing</p>
+</div>
+
+<!-- Step Indicator -->
+<div class="steps fade-in fade-in-d1">
+    <div class="step-item done">
+        <div class="step-number">✓</div>
+        <span class="step-label">Ambil Data</span>
+    </div>
+    <div class="step-connector done"></div>
+    <div class="step-item done">
+        <div class="step-number">✓</div>
+        <span class="step-label">Preprocessing</span>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step-item active">
+        <div class="step-number">3</div>
+        <span class="step-label">Training</span>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step-item">
+        <div class="step-number">4</div>
+        <span class="step-label">Prediksi</span>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="grid-2 fade-in fade-in-d2 mb-4">
+    <div class="metric-card success">
+        <div class="metric-label">Data Training</div>
+        <div class="metric-value">{{ train_count }}</div>
+        <div class="metric-sub">80% dari total data</div>
+    </div>
+    <div class="metric-card info">
+        <div class="metric-label">Data Testing</div>
+        <div class="metric-value">{{ test_count }}</div>
+        <div class="metric-sub">20% dari total data</div>
+    </div>
+</div>
+
+<!-- Data Tables -->
+<div class="grid-2 fade-in fade-in-d3">
+    <div class="card">
+        <div class="card-header success">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+            <h4>Data Training</h4>
+        </div>
+        <div class="card-body" style="padding:0;">
+            <div class="table-responsive" style="border:none;border-radius:0;">
+                {{ train_df|safe }}
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+            <h4>Data Testing</h4>
+        </div>
+        <div class="card-body" style="padding:0;">
+            <div class="table-responsive" style="border:none;border-radius:0;">
+                {{ test_df|safe }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="btn-group mt-4 fade-in">
+    <a href="{{ url_for('train_model') }}" class="btn btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Kembali
+    </a>
+    <form action="{{ next_step }}" method="POST" id="trainingForm" style="display:inline-flex;gap:8px;">
+        <input type="hidden" name="epochs" value="{{ epochs }}">
+        <input type="hidden" name="batch_size" value="{{ batch_size }}">
+        <input type="hidden" name="neurons" value="{{ neurons }}">
+        <button type="submit" class="btn btn-success" id="trainBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span class="btn-text">Lanjutkan Training LSTM</span>
+            <span class="spinner hidden" id="trainSpinner"></span>
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+    document.getElementById('trainingForm').addEventListener('submit', function() {
+        var overlay = document.getElementById('trainingOverlay');
+        var btn = document.getElementById('trainBtn');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        btn.disabled = true; btn.style.opacity = '0.7';
+        btn.querySelector('.btn-text').textContent = 'Training...';
+        document.getElementById('trainSpinner').classList.remove('hidden');
+
+        var steps = [
+            { id: 'tstep1', delay: 1000 },
+            { id: 'tstep2', delay: 3000 },
+            { id: 'tstep3', delay: 60000 },
+            { id: 'tstep4', delay: 90000 }
+        ];
+
+        var progressBar = document.getElementById('trainingProgress');
+
+        steps.forEach(function(step, i) {
+            setTimeout(function() {
+                var el = document.getElementById(step.id);
+                var tx = document.getElementById(step.id + 'Text');
+                el.className = 'step-icon processing';
+                tx.innerHTML = tx.textContent.replace('...', '') + ' <span class="spinner" style="margin-left:6px;"></span>';
+
+                if (i < steps.length - 1) {
+                    setTimeout(function() {
+                        el.className = 'step-icon completed';
+                        el.innerHTML = '✓';
+                        tx.innerHTML = tx.textContent.split(' <span')[0].replace('...', ' — Selesai');
+                        progressBar.style.width = ((i + 1) / steps.length * 100) + '%';
+                    }, step.delay);
+                }
+            }, i === 0 ? 500 : steps[i-1].delay);
+        });
+    });
+</script>
+{% endblock %}

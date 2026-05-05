@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Training Selesai{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in">
+    <h1>Training Model Selesai</h1>
+    <p>Model LSTM telah berhasil dilatih dan siap digunakan</p>
+</div>
+
+<!-- Step Indicator -->
+<div class="steps fade-in fade-in-d1">
+    <div class="step-item done">
+        <div class="step-number">✓</div>
+        <span class="step-label">Ambil Data</span>
+    </div>
+    <div class="step-connector done"></div>
+    <div class="step-item done">
+        <div class="step-number">✓</div>
+        <span class="step-label">Training</span>
+    </div>
+    <div class="step-connector done"></div>
+    <div class="step-item active">
+        <div class="step-number">3</div>
+        <span class="step-label">Prediksi</span>
+    </div>
+</div>
+
+<!-- Success Alert -->
+<div class="alert alert-success fade-in fade-in-d1" style="padding:1.1rem;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <div>
+        <strong style="display:block;margin-bottom:3px;">Model LSTM Berhasil Dilatih!</strong>
+        <span style="font-size:.8rem;">Model telah disimpan dan siap digunakan untuk prediksi harga saham.</span>
+    </div>
+</div>
+
+<!-- Model Parameters -->
+<div class="card fade-in fade-in-d2 mb-4">
+    <div class="card-header accent">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--v2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.18V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.26.6.85 1 1.51 1H21a2 2 0 0 1 0 4h-.09c-.66 0-1.25.4-1.51 1z"/></svg>
+        <h4>Parameter Model</h4>
+    </div>
+    <div class="card-body">
+        <div class="param-list">
+            <div class="param-item">
+                <span class="param-name">Epochs</span>
+                <span class="badge">{{ epochs }}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-name">Epoch Aktual (Early Stopping)</span>
+                <span class="badge badge-success">{{ actual_epochs }}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-name">Batch Size</span>
+                <span class="badge">{{ batch_size }}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-name">Neurons</span>
+                <span class="badge">{{ neurons }}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-name">Time Step</span>
+                <span class="badge badge-info">{{ time_step }}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-name">Learning Rate</span>
+                <span class="badge badge-info">{{ learning_rate }}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-name">Dropout Rate</span>
+                <span class="badge badge-info">{{ dropout_rate }}</span>
+            </div>
+            <div class="param-item">
+                <span class="param-name">LSTM Layers</span>
+                <span class="badge badge-info">{{ lstm_layers }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loss Graph -->
+{% if loss_graph_url %}
+<div class="card fade-in mb-4">
+    <div class="card-header warning">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <h4>Training & Validation Loss</h4>
+    </div>
+    <div class="card-body">
+        <div class="graph-container">
+            <img src="data:image/png;base64,{{ loss_graph_url }}" alt="Training Loss Graph">
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Model File Info -->
+<div class="card fade-in mb-4">
+    <div class="card-header info">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <h4>File Model</h4>
+    </div>
+    <div class="card-body">
+        <p style="font-size:.7rem;color:var(--t3);margin-bottom:.4rem;">Nama file yang akan diunduh:</p>
+        <code style="display:block;padding:.6rem .8rem;background:rgba(0,0,0,0.2);border-radius:var(--Rs);font-size:.73rem;color:var(--v2);word-break:break-all;border:1px solid var(--b);">{{ model_filename }}.zip</code>
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="btn-group fade-in">
+    <a href="{{ url_for('download_model', filename=model_filename) }}" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Model
+    </a>
+    <a href="{{ url_for('predict') }}" class="btn btn-success">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Lanjutkan ke Prediksi
+    </a>
+</div>
+{% endblock %}

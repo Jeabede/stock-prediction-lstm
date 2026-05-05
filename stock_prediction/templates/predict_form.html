@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Prediksi{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in">
+    <h1>Prediksi Saham</h1>
+    <p>Model siap digunakan untuk prediksi harga saham</p>
+</div>
+
+<div class="card fade-in fade-in-d1" style="max-width:480px;margin:0 auto;">
+    <div class="card-header accent">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--v2)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <h4>Konfirmasi Prediksi</h4>
+    </div>
+    <div class="card-body">
+        <p style="color:var(--t2);margin-bottom:1.2rem;font-size:.82rem;">
+            Model LSTM telah siap. Klik tombol di bawah untuk memulai proses prediksi.
+        </p>
+        <div class="btn-group">
+            <a href="{{ url_for('index') }}" class="btn btn-ghost">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Kembali
+            </a>
+            <form method="POST" action="/predict">
+                <button type="submit" class="btn btn-primary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Mulai Prediksi
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

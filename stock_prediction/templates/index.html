@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Beranda{% endblock %}
+
+{% block extra_style %}
+<style>
+    .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;align-items:start}
+    .home-grid .card{height:100%}
+    .compact .form-group{margin-bottom:.55rem}
+    .compact .form-label{font-size:.73rem;margin-bottom:.2rem}
+    .compact .form-control,.compact .form-select{padding:8px 10px;font-size:.8rem}
+    .compact .form-text{font-size:.66rem;margin-top:.12rem}
+    .actions{display:flex;flex-direction:column;gap:.55rem}
+    .action-card{
+        display:flex;align-items:center;gap:.85rem;
+        padding:.85rem 1rem;
+        background:var(--card);border:1px solid var(--b);
+        border-radius:var(--R);cursor:pointer;
+        transition:all .3s var(--e);
+        text-decoration:none;color:inherit;position:relative;overflow:hidden;
+    }
+    .action-card::after{
+        content:'';position:absolute;inset:0;
+        background:linear-gradient(135deg,rgba(124,58,237,0.03),transparent);
+        opacity:0;transition:opacity .3s var(--e);
+    }
+    .action-card:hover{
+        border-color:var(--b2);transform:translateY(-2px);
+        box-shadow:0 8px 30px rgba(0,0,0,0.2);
+    }
+    .action-card:hover::after{opacity:1}
+    .action-card .a-icon{
+        width:38px;height:38px;border-radius:10px;
+        display:flex;align-items:center;justify-content:center;flex-shrink:0;
+        position:relative;z-index:1;
+    }
+    .action-card .a-icon.purple{background:rgba(124,58,237,0.08);color:var(--v2)}
+    .action-card .a-icon.green{background:rgba(16,185,129,0.08);color:var(--g)}
+    .action-card .a-icon.teal{background:rgba(6,182,212,0.08);color:var(--c)}
+    .action-card .a-text{position:relative;z-index:1}
+    .action-card .a-text h4{font-size:.82rem;font-weight:600;margin-bottom:1px}
+    .action-card .a-text p{font-size:.7rem;color:var(--t3)}
+    .action-card .a-arrow{margin-left:auto;color:var(--t3);position:relative;z-index:1;transition:transform .2s var(--e)}
+    .action-card:hover .a-arrow{transform:translateX(3px);color:var(--v2)}
+    @media(max-width:768px){.home-grid{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in">
+    <h1>Prediksi Saham dengan LSTM</h1>
+    <p>Analisis dan prediksi harga saham menggunakan deep learning</p>
+</div>
+
+<div class="home-grid fade-in fade-in-d1">
+    <!-- Form -->
+    <div class="card">
+        <div class="card-header accent">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--v2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <h4>Konfigurasi Data Saham</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" class="compact">
+                <div class="form-group">
+                    <label class="form-label">Kode Saham</label>
+                    <select name="stock_name" required class="form-select">
+                        <option value="">Pilih Saham</option>
+                        <option value="BBCA.JK">BBCA.JK — Bank Central Asia</option>
+                        <option value="BBRI.JK">BBRI.JK — Bank Rakyat Indonesia</option>
+                        <option value="BMRI.JK">BMRI.JK — Bank Mandiri</option>
+                        <option value="BBNI.JK">BBNI.JK — Bank Negara Indonesia</option>
+                        <option value="BBTN.JK">BBTN.JK — Bank Tabungan Negara</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Tanggal Mulai</label>
+                        <input type="date" name="start_date" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tanggal Selesai</label>
+                        <input type="date" name="end_date" required class="form-control">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Frekuensi Prediksi</label>
+                    <select class="form-select" name="prediction_timeframe">
+                        <option value="daily" {% if prediction_timeframe == 'daily' %}selected{% endif %}>Harian (Daily)</option>
+                        <option value="weekly" {% if prediction_timeframe == 'weekly' %}selected{% endif %}>Mingguan (Weekly)</option>
+                        <option value="monthly" {% if prediction_timeframe == 'monthly' %}selected{% endif %}>Bulanan (Monthly)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Ambil Data Saham
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div>
+        <div class="actions">
+            <a href="{{ url_for('train_model') }}" class="action-card">
+                <div class="a-icon purple">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+                <div class="a-text">
+                    <h4>Training Model</h4>
+                    <p>Latih model LSTM dengan data saham</p>
+                </div>
+                <div class="a-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </a>
+
+            <a href="{{ url_for('predict') }}" class="action-card">
+                <div class="a-icon green">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                <div class="a-text">
+                    <h4>Prediksi dengan Model Saat Ini</h4>
+                    <p>Gunakan model yang baru dilatih</p>
+                </div>
+                <div class="a-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </a>
+
+            <a href="{{ url_for('direct_predict') }}" class="action-card">
+                <div class="a-icon teal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <div class="a-text">
+                    <h4>Prediksi Langsung</h4>
+                    <p>Upload model terlatih & prediksi langsung</p>
+                </div>
+                <div class="a-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if data %}
+<div class="card fade-in mt-3">
+    <div class="card-header success">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        <h4>Data Saham: {{ stock_name }}</h4>
+        <div style="margin-left:auto;">
+            <a href="{{ url_for('download_csv') }}" class="btn btn-success" style="padding:5px 12px;font-size:.73rem;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Unduh CSV
+            </a>
+        </div>
+    </div>
+    <div class="card-body" style="padding:0;">
+        <div class="table-responsive" style="border:none;border-radius:0;">
+            {{ data|safe }}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

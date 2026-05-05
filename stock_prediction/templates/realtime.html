@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Data Realtime{% endblock %}
+
+{% block extra_style %}
+<style>
+    .rt-hero{display:grid;grid-template-columns:auto 1fr;gap:1.5rem;align-items:center;margin-bottom:1.5rem}
+    .rt-price-block{text-align:center}
+    .rt-price{font-size:2.5rem;font-weight:800;letter-spacing:-.04em;line-height:1}
+    .rt-price.up{color:var(--g)}.rt-price.down{color:var(--r)}
+    .rt-change{font-size:.88rem;font-weight:600;margin-top:.3rem;display:flex;align-items:center;justify-content:center;gap:6px}
+    .rt-change.up{color:var(--g)}.rt-change.down{color:var(--r)}
+    .rt-timestamp{font-size:.68rem;color:var(--t3);margin-top:.2rem}
+    .rt-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:.55rem}
+    .rt-metric{background:rgba(0,0,0,0.12);border:1px solid var(--b);border-radius:var(--Rs);padding:.65rem .75rem;transition:all .2s var(--e)}
+    .rt-metric:hover{border-color:var(--b2)}
+    .rt-metric .rm-label{font-size:.66rem;color:var(--t3);text-transform:uppercase;letter-spacing:.04em}
+    .rt-metric .rm-value{font-size:.92rem;font-weight:700;color:var(--t);margin-top:.12rem}
+    .rt-prediction{
+        background:rgba(124,58,237,0.05);border:1px solid rgba(124,58,237,0.12);
+        border-radius:var(--R);padding:1rem 1.2rem;
+        display:flex;align-items:center;gap:1rem;margin-top:1rem;
+    }
+    .rt-prediction .rp-icon{
+        width:42px;height:42px;border-radius:12px;
+        background:rgba(124,58,237,0.1);color:var(--v2);
+        display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    }
+    .rt-prediction .rp-label{font-size:.7rem;color:var(--t3)}
+    .rt-prediction .rp-value{font-size:1.25rem;font-weight:700;color:var(--v2)}
+    .rt-prediction .rp-sub{font-size:.68rem;color:var(--t2);margin-top:.1rem}
+    .rt-chart-box{background:var(--card);border:1px solid var(--b);border-radius:var(--R);padding:1rem;margin-top:1.2rem}
+    .rt-chart-box canvas{max-height:260px}
+    .selenium-badge{
+        display:inline-flex;align-items:center;gap:5px;
+        padding:3px 10px;font-size:.66rem;font-weight:600;
+        border-radius:20px;background:rgba(16,185,129,0.08);
+        color:var(--g);border:1px solid rgba(16,185,129,0.12);
+    }
+    .selenium-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--g);animation:blink 1.5s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    @media(max-width:768px){
+        .rt-hero{grid-template-columns:1fr;text-align:center}
+        .rt-price{font-size:2rem}
+        .rt-metrics{grid-template-columns:repeat(2,1fr)}
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in">
+    <h1>Data Saham Realtime</h1>
+    <p>
+        <span class="selenium-badge"><span class="dot"></span> Selenium Active</span>
+        &nbsp; Scraping data langsung dari Yahoo Finance
+    </p>
+</div>
+
+{% if data %}
+<!-- Stock Info Header -->
+<div class="card fade-in mb-4">
+    <div class="card-body" style="padding:1.5rem;">
+        <div class="rt-hero">
+            <div class="rt-price-block">
+                <div style="font-size:.8rem;color:var(--t2);font-weight:600;margin-bottom:.2rem;">
+                    {{ data.stock_code }}
+                </div>
+                <div class="rt-price {% if data.change and data.change >= 0 %}up{% else %}down{% endif %}">
+                    {{ "%.2f"|format(data.price) if data.price else 'N/A' }}
+                </div>
+                {% if data.change is not none %}
+                <div class="rt-change {% if data.change >= 0 %}up{% else %}down{% endif %}">
+                    {% if data.change >= 0 %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                    {% else %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    {% endif %}
+                    {{ "%.2f"|format(data.change) }} ({{ "%.2f"|format(data.change_pct) }}%)
+                </div>
+                {% endif %}
+                <div class="rt-timestamp">Terakhir diperbarui: {{ data.timestamp }}</div>
+            </div>
+
+            <div class="rt-metrics">
+                <div class="rt-metric">
+                    <div class="rm-label">Open</div>
+                    <div class="rm-value">{{ "%.2f"|format(data.open) if data.open else '-' }}</div>
+                </div>
+                <div class="rt-metric">
+                    <div class="rm-label">High</div>
+                    <div class="rm-value">{{ "%.2f"|format(data.high) if data.high else '-' }}</div>
+                </div>
+                <div class="rt-metric">
+                    <div class="rm-label">Low</div>
+                    <div class="rm-value">{{ "%.2f"|format(data.low) if data.low else '-' }}</div>
+                </div>
+                <div class="rt-metric">
+                    <div class="rm-label">Volume</div>
+                    <div class="rm-value">{{ "{:,.0f}".format(data.volume) if data.volume else '-' }}</div>
+                </div>
+                <div class="rt-metric">
+                    <div class="rm-label">Prev Close</div>
+                    <div class="rm-value">{{ "%.2f"|format(data.prev_close) if data.prev_close else '-' }}</div>
+                </div>
+                <div class="rt-metric">
+                    <div class="rm-label">Market Cap</div>
+                    <div class="rm-value">{{ "%.2f"|format(data.market_cap / 1e12) if data.market_cap else '-' }}T</div>
+                </div>
+                <div class="rt-metric">
+                    <div class="rm-label">P/E Ratio</div>
+                    <div class="rm-value">{{ "%.2f"|format(data.pe_ratio) if data.pe_ratio else '-' }}</div>
+                </div>
+                <div class="rt-metric">
+                    <div class="rm-label">52W High</div>
+                    <div class="rm-value">{{ "%.2f"|format(data.fifty_two_week_high) if data.fifty_two_week_high else '-' }}</div>
+                </div>
+            </div>
+        </div>
+
+        {% if prediction %}
+        <div class="rt-prediction">
+            <div class="rp-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div>
+                <div class="rp-label">Prediksi LSTM (time step berikutnya)</div>
+                <div class="rp-value">{{ "%.2f"|format(prediction) }}</div>
+                <div class="rp-sub">
+                    {% if data.price %}
+                    {% set diff = prediction - data.price %}
+                    {% set pct = (diff / data.price * 100) if data.price else 0 %}
+                    {{ "%.2f"|format(diff) }} ({{ "%+.2f"|format(pct) }}%) dari harga saat ini
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% elif not model_exists %}
+        <div class="alert alert-warning mt-3" style="margin-bottom:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>Model LSTM belum tersedia. Latih model terlebih dahulu untuk mendapatkan prediksi realtime.</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if recent_data %}
+<!-- Mini Chart -->
+<div class="rt-chart-box fade-in fade-in-d1">
+    <div style="font-size:.8rem;font-weight:600;color:var(--t2);margin-bottom:.7rem;display:flex;align-items:center;gap:8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--v2)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Harga Close — 30 Hari Terakhir (yfinance)
+    </div>
+    <canvas id="miniChart"></canvas>
+</div>
+{% endif %}
+
+{% else %}
+<!-- Form -->
+<div class="card fade-in" style="max-width:500px;margin:0 auto;">
+    <div class="card-header accent">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--v2)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <h4>Pilih Saham</h4>
+    </div>
+    <div class="card-body">
+        <form method="POST" id="rtForm">
+            <div class="form-group">
+                <label class="form-label">Kode Saham</label>
+                <select name="stock_name" required class="form-select">
+                    <option value="">Pilih Saham</option>
+                    <option value="BBCA.JK">BBCA.JK — Bank Central Asia</option>
+                    <option value="BBRI.JK">BBRI.JK — Bank Rakyat Indonesia</option>
+                    <option value="BMRI.JK">BMRI.JK — Bank Mandiri</option>
+                    <option value="BBNI.JK">BBNI.JK — Bank Negara Indonesia</option>
+                    <option value="BBTN.JK">BBTN.JK — Bank Tabungan Negara</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="rtBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span id="rtBtnText">Ambil Data Realtime</span>
+                <span class="spinner hidden" id="rtSpinner"></span>
+            </button>
+            <p class="form-text mt-2" style="text-align:center;">
+                Menggunakan Selenium untuk scrape data dari Yahoo Finance
+            </p>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- Actions -->
+<div class="btn-group mt-4 fade-in">
+    <a href="{{ url_for('index') }}" class="btn btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Beranda
+    </a>
+    {% if data %}
+    <form method="POST" style="display:inline-flex;">
+        <input type="hidden" name="stock_name" value="{{ stock_code }}">
+        <button type="submit" class="btn btn-success">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Refresh Data
+        </button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+{% if data and recent_data %}
+(function(){
+    var recentData = {{ recent_data | tojson | safe }};
+    if (!recentData || recentData.length === 0) return;
+
+    var labels = recentData.map(function(d){ return d.date; });
+    var values = recentData.map(function(d){ return d.close; });
+
+    var ctx = document.getElementById('miniChart');
+    if (!ctx) return;
+
+    var isUp = values[values.length-1] >= values[0];
+    var lineColor = isUp ? '#10b981' : '#ef4444';
+    var fillColor = isUp ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)';
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Close',
+                data: values,
+                borderColor: lineColor,
+                backgroundColor: fillColor,
+                fill: true,
+                borderWidth: 2,
+                pointRadius: 1,
+                pointHoverRadius: 4,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(c){ return 'Close: ' + c.parsed.y.toLocaleString('id-ID', {minimumFractionDigits: 2}); }
+                    }
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { maxRotation: 45, maxTicksLimit: 8, font: { size: 10 } } },
+                y: { grid: { color: 'rgba(99,102,241,0.04)' }, ticks: { callback: function(v){ return v.toLocaleString('id-ID'); }, font: { size: 10 } } }
+            }
+        }
+    });
+})();
+{% endif %}
+
+{% if not data %}
+document.getElementById('rtForm').addEventListener('submit', function(){
+    var btn = document.getElementById('rtBtn');
+    document.getElementById('rtBtnText').textContent = 'Scraping data...';
+    document.getElementById('rtSpinner').classList.remove('hidden');
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+});
+{% endif %}
+</script>
+{% endblock %}
